@@ -1,85 +1,77 @@
-#include "Model.h"
-#include "Iblock.h"
-#include "Tblock.h"
-#include "Oblock.h"
+#include "Model/Model.h"
+#include "Model/Blocks/Iblock.h"
 
 #include <iostream>
 
 void operator+=(std::array<sf::Vector2i, 4>& cor, sf::Vector2i lf);
 
-Model::Model(int sizeQueue, sf::Vector2i sizeMap):
-	_map(sizeMap.x, sizeMap.y),
-	_sizeMap(sizeMap)
+Model::Model(Size sizeMap) :
+	_map(sizeMap)
 {
 	srand(time(NULL));
 
 	_factory.add<Iblock>(IdShape::Iblock);
-	_factory.add<Tblock>(IdShape::Tblock);
-	_factory.add<Oblock>(IdShape::Oblock);
 
-	_actualShape = createShape();
-	_map.addShape(_actualShape->getCoordinates(), _actualShape->getColor());
+	_actualShape = CreateShape();
+	_map.SetShape(std::weak_ptr(_actualShape));
 }
 
-void Model::update(Command cm)
+void Model::Update(Command cm)
 {
-	std::array<sf::Vector2i, 4> cor;
+	DiscreptionShape shapeDisc = _actualShape->GetDescription();
 
 	switch (cm)
 	{
 	case Command::Left:
-		cor = _actualShape->getCoordinates();
-		cor += sf::Vector2i(-1, 0);
-		break;
-	case Command::Up:
-		cor = _actualShape->getCoordinatesNextStage();
+		shapeDisc.coordinates += sf::Vector2i(-1, 0);
 		break;
 	case Command::Right:
-		cor = _actualShape->getCoordinates();
-		cor += sf::Vector2i(1, 0);
+		shapeDisc.coordinates += sf::Vector2i(1, 0);
 		break;
 	case Command::Down:
-		cor = _actualShape->getCoordinates();
-		cor += sf::Vector2i(0, 1);
+		shapeDisc.coordinates += sf::Vector2i(0, 1);
+		break;
+	case Command::Up:
+		shapeDisc = _actualShape->GetDescription(true);
 		break;
 	default:
 		break;
 	}
 
-	if (_map.checkPosition(cor))
+	if (_map.CheckPosition(shapeDisc.coordinates))
 	{
-		_actualShape->move(cm);
-		_map.updateMap(_actualShape->getCoordinates());
+		_actualShape->Move(cm);
+		_map.Update();
 	}
 	else
 	{
 		if (cm == Command::Down)
 		{
-			_actualShape = createShape();
-			_map.checkTetris();
-			_map.addShape(_actualShape->getCoordinates(), _actualShape->getColor());
+			_actualShape = CreateShape();
+			_map.CheckTetris();
+			_map.SetShape(std::weak_ptr(_actualShape));
 		}
 	}
 
-	updateViews();
+	UpdateViews();
 }
 
-void Model::addView(AbstratView* view)
+void Model::AddView(IView* view)
 {
 	_views.push_back(view);
 }
 
-ConfigModel Model::getConfig()
+DiscreptionModel Model::GetConfig()
 {
-	return ConfigModel(_map.getMap(), _sizeMap.x, _sizeMap.y);
+	return _map.GetConfig();
 }
 
-IdShape Model::randomIdShape()
+IdShape Model::RandomIdShape()
 {
-	return static_cast<IdShape>(std::rand()%_factory.size());
+	return static_cast<IdShape>(std::rand()%_factory.Size());
 }
 
-sf::Color Model::randomColor()
+sf::Color Model::RandomColor()
 {
 	sf::Color color;
 	int i = std::rand() % 7 + 1;
@@ -101,17 +93,23 @@ sf::Color Model::randomColor()
 	return color;
 }
 
-AbstractShape* Model::createShape()
+std::shared_ptr<AbstractShape> Model::CreateShape()
 {
-	AbstractShape* result = _factory.create(randomIdShape());
-	result->init(randomColor(), sf::Vector2i(_sizeMap.x/2, 3));
-	return result;
+	std::array<sf::Vector2i, 4> center;
+	Size sizeMap = _map.GetConfig().size;
+
+	for( auto& x : center) x = sf::Vector2i(sizeMap.width/2, 3);
+
+	DiscreptionShape initShape(RandomColor(), center);
+
+	std::shared_ptr<AbstractShape> shapPtr(_factory.Create(RandomIdShape(), initShape));
+	return shapPtr;
 }
 
-void Model::updateViews()
+void Model::UpdateViews()
 {
 	for (auto& view : _views)
-		view->update();
+		view->Update();
 }
 
 void operator+=(std::array<sf::Vector2i, 4>& cor, sf::Vector2i lf)

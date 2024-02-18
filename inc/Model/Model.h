@@ -1,45 +1,40 @@
 #pragma once
 
+#include "ModelMap.h"
+
 #include "AbstractShape.h"
-#include "Map.h"
-#include "AbstratView.h"
-#include "ShapeFactory.h"
-#include "ConfigModel.h"
+#include "interfaces/IView.h"
+#include "Factory/ShapeFactory.h"
+#include "data/DiscreptionModel.h"
+#include "data/Command.h"
 
 #include <SFML/System/Clock.hpp>
 
-#include <queue>
 #include <list>
+#include <memory>
 
-/// <summary>
-/// Игра - это поле и фигура(ы).
-/// 
-/// Главный класс модели игры, отвечает:
-/// 1) за взаимоотношение модели карты и активной фигуры,
-/// 2) изменение положение фигуры, 
-/// </summary>
 class Model
 {
 public:
-	Model(int sizeQueue, sf::Vector2i sizeMap);
+	Model(Size sizeMap);
 
-	void update(Command cm);
+	void Update(Command cmnd);
 
-	void addView(AbstratView* view);
+	void AddView(IView* view);
 
-	ConfigModel getConfig();
+	DiscreptionModel GetConfig();
 private:
-	IdShape randomIdShape();
-	sf::Color randomColor();
+	IdShape RandomIdShape();
+	sf::Color RandomColor();
 
-	AbstractShape* createShape();
-	void updateViews();
+	std::shared_ptr<AbstractShape> CreateShape();
+
+	void UpdateViews();
 private:
-	std::list<AbstratView*> _views;
-	Map _map;
+	std::list<IView*> _views;
 
+	ModelMap _map;
 	ShapeFactory _factory;
 
-	AbstractShape* _actualShape;
-	sf::Vector2i _sizeMap;
+	std::shared_ptr<AbstractShape> _actualShape;
 };

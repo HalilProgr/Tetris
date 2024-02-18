@@ -1,45 +1,34 @@
-#include "ViewMap.h"
+#include "View/ViewMap.h"
 
-ViewMap::ViewMap(sf::Vector2f sizeWindow):
-    _width(0),
-    _height(0),
-    _sizeWindow(sizeWindow),
-    _map(nullptr)
-{}
-
-void ViewMap::init(ConfigModel conf)
+ViewMap::ViewMap(Size sizeWindow)
 {
-    _width = conf.width;
-    _height = conf.hight;
-
-    _vertices.setPrimitiveType(sf::Triangles);
-    _vertices.resize(_width * _height * 6);
-
-    _tileSize.x = _sizeWindow.x / _width;
-    _tileSize.y = _sizeWindow.y / _height;
-
-    if (conf.ptr_map != nullptr && _map == nullptr)
-        _map = conf.ptr_map;
+    _sizeWindow = sizeWindow;
 }
 
-void ViewMap::update()
+void ViewMap::Init(DiscreptionModel disc)
 {
-    if (_map == nullptr) return;
+    _sizeMap = disc.size;
+    _map = disc.map;
+
+    _vertices.setPrimitiveType(sf::Triangles);
+    _vertices.resize(_sizeMap.width * _sizeMap.hight * 6);
+
+    _tileSize.x = _sizeWindow.width / _sizeMap.width;
+    _tileSize.y = _sizeWindow.hight / _sizeMap.hight;
+}
+
+void ViewMap::Update()
+{
+    if (_map.empty()) return;
     
-    int x = 0;
-    int y = 0;
+    int x = 0, y = 0;
 
-    int _mapSize = _width * _height;
-
-    for (int i = 0; i < _mapSize; i++)
+    for (size_t count = 0; count < size_t(_sizeMap.width * _sizeMap.hight); ++count)
     {
-        sf::Color color = getColorTitle(_map[i]);
-        createTitle(x, y, color);
+        sf::Color color = GetColorTitle(_map[count]);
+        CreateTitle(x, y, color);
 
-        if (x < _width - 1)
-            x++;
-        else
-            x = 0, y++;
+        (x < _sizeMap.width - 1) ? x++ : x = 0, y++;
     }
 }
 
@@ -50,9 +39,9 @@ void ViewMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
     target.draw(_vertices, states);
 }
 
-void ViewMap::createTitle(int x, int y, sf::Color color)
+void ViewMap::CreateTitle(int x, int y, sf::Color color)
 {
-    sf::Vertex* triangles = &_vertices[(x + y * _width) * 6];
+    sf::Vertex* triangles = &_vertices[(x + y * _sizeMap.width) * 6];
 
     triangles[0].position = sf::Vector2f(x * _tileSize.x, y * _tileSize.y);
     triangles[1].position = sf::Vector2f((x + 1) * _tileSize.x, y * _tileSize.y);
@@ -61,43 +50,31 @@ void ViewMap::createTitle(int x, int y, sf::Color color)
     triangles[4].position = sf::Vector2f((x + 1) * _tileSize.x, y * _tileSize.y);
     triangles[5].position = sf::Vector2f((x + 1) * _tileSize.x, (y + 1) * _tileSize.y);
 
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) 
         triangles[i].color = color;
 }
 
-sf::Color ViewMap::getColorTitle(int codetitle)
+sf::Color ViewMap::GetColorTitle(int codetitle)
 {
-    sf::Color color;
-
     switch (codetitle)
     {
     case 0:
-        color = sf::Color::Black;
-        break;
+        return sf::Color::Black;
     case 1:
-        color = sf::Color::White;
-        break;
+        return sf::Color::White;
     case 2:
-        color = sf::Color::Red;
-        break;
+        return sf::Color::Red;
     case 3:
-        color = sf::Color::Green;
-        break;
+        return sf::Color::Green;
     case 4:
-        color = sf::Color::Blue;
-        break;
+        return sf::Color::Blue;
     case 5:
-        color = sf::Color::Yellow;
-        break;
+        return sf::Color::Yellow;
     case 6:
-        color = sf::Color::Magenta;
-        break;
+        return sf::Color::Magenta;
     case 7:
-        color = sf::Color::Cyan;
-        break;
+        return sf::Color::Cyan;
     default:
-        color = sf::Color::Black;
-        break;
+        return sf::Color::Black;
     }
-    return color;
 }

@@ -1,44 +1,27 @@
 #pragma once
 
-#include "AbstractShape.h"
+#include "Model/AbstractShape.h"
 
 class Iblock : public AbstractShape
 {
-protected:
-	std::array<sf::Vector2i, 4> getOffset(Stage stage) override
+public:
+
+	Iblock(DiscreptionShape shape) : AbstractShape(shape) {};
+
+private:
+
+	std::array<std::array<sf::Vector2i,4>, 3>& Stages() override
 	{
-		std::array<sf::Vector2i, 4> offset;
+		static bool initResult;
+		static std::array<std::array<sf::Vector2i,4>, 3> result;
 
-		switch (stage)
-		{
-		case AbstractShape::Stage::First:
-			offset[0] = { -2,0 };
-			offset[1] = { -1,0 };
-			offset[2] = { 0,0 };
-			offset[3] = { 1,0 };
-			break;
-		case AbstractShape::Stage::Second:
-			offset[0] = { 0,-2 };
-			offset[1] = { 0,-1 };
-			offset[2] = { 0,0 };
-			offset[3] = { 0,1 };
-			break;
-		case AbstractShape::Stage::Third:
-			offset[0] = { 2,0 };
-			offset[1] = { 1,0 };
-			offset[2] = { 0,0 };
-			offset[3] = { -1,0 };
-			break;
-		case AbstractShape::Stage::Fourth:
-			offset[0] = { 0,2 };
-			offset[1] = { 0,1 };
-			offset[2] = { 0,0 };
-			offset[3] = { 0,-1 };
-			break;
-		default:
-			break;
-		}
+		if (initResult) return result;
 
-		return offset;
-	}
+		result[0] = std::array<sf::Vector2i,4>({{-2,0},{0,-2},{2,0},{0,2}});
+		result[1] = std::array<sf::Vector2i,4>({{-2,0},{0,-2},{2,0},{0,2}});
+		result[2] = std::array<sf::Vector2i,4>({{1,0},{0,1},{-1,0},{0,-1}});
+
+		initResult = true;
+		return result;
+	};
 };

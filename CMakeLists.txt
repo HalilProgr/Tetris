@@ -2,18 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(Tetris LANGUAGES CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-
-set(SOURCES
-    src/Controller/Controller.cpp
-    src/Model/AbstractShape.cpp
-    src/Model/Map.cpp
-    src/Model/Model.cpp
-    src/View/View.cpp
-    src/View/ViewMap.cpp
-    src/Game.cpp
-    src/main.cpp
-)
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
 include(FetchContent)
 FetchContent_Declare(SFML
@@ -21,18 +10,19 @@ FetchContent_Declare(SFML
     GIT_TAG 2.6.x)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+file(GLOB_RECURSE _source_list
+       ${PROJECT_SOURCE_DIR}/src/*.cpp
+       ${PROJECT_SOURCE_DIR}/inc/*.h)
+
+add_executable(${PROJECT_NAME} ${_source_list})
 
 target_include_directories(Tetris PRIVATE
         ${PROJECT_SOURCE_DIR}/inc
-        ${PROJECT_SOURCE_DIR}/inc/Controller
-        ${PROJECT_SOURCE_DIR}/inc/Model
-        ${PROJECT_SOURCE_DIR}/inc/Model/Blocks
-        ${PROJECT_SOURCE_DIR}/inc/Model/Factory
-        ${PROJECT_SOURCE_DIR}/inc/View
 )
+
 target_link_libraries(Tetris PRIVATE sfml-graphics)
-target_compile_features(Tetris PRIVATE cxx_std_17)
+target_compile_features(Tetris PRIVATE cxx_std_20)
+
 
 if(WIN32)
     add_custom_command(
@@ -42,4 +32,13 @@ if(WIN32)
         VERBATIM)
 endif()
 
-install(TARGETS Tetris)
+install(TARGETS Tetris
+        CONFIGURATIONS Debug
+        RUNTIME
+          DESTINATION ${PROJECT_SOURCE_DIR}/bin/Debug
+        )
+install(TARGETS Tetris
+        CONFIGURATIONS Release
+        RUNTIME
+          DESTINATION ${PROJECT_SOURCE_DIR}/bin/Release
+        )

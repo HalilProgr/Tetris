@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ObjectFactory.h"
-#include "AbstractShape.h"
+#include "model/AbstractShape.h"
 
 enum class IdShape {
 	Iblock,
@@ -13,11 +13,11 @@ enum class IdShape {
 class ShapeFactory:public ObjectFactory<AbstractShape, IdShape>
 {
 public:
-	AbstractShape* create(IdShape id) {
-		return _factory[id]->create();
+	AbstractShape* Create(IdShape id, DiscreptionShape shape) {
+		return _factory[id]->Create(shape);
 	}
 
-	int size() const {
+	int Size() const {
 		return _factory.size();
 	};
 };

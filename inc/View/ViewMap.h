@@ -1,35 +1,37 @@
 #pragma once
 
-#include "ConfigModel.h"
+#include "data/DiscreptionModel.h"
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 
-/// <summary>
-/// класс - поле.
-/// </summary>
 class ViewMap: public sf::Drawable, public sf::Transformable
 {
 public:
-	ViewMap(sf::Vector2f sizeWindow);
-	void init(ConfigModel conf);
-	void update();
+	explicit ViewMap(Size sizeWindow);
+
+	void Init(DiscreptionModel disc);
+
+	void Update();
+
 private:
+
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
-	void createTitle(int x, int y, sf::Color color);
-	sf::Color getColorTitle(int codetitle);
+	void CreateTitle(int x, int y, sf::Color color);
+
+	sf::Color GetColorTitle(int codetitle);
+
 private:
-	const int* _map;
+	std::span<int> _map;
+
+	Size _sizeMap;
+	Size _sizeWindow;
 
     sf::VertexArray _vertices;
 
 	sf::Vector2f _tileSize;
-	sf::Vector2i _sizeWindow;
-
-	int _width;
-	int _height;
 };
 

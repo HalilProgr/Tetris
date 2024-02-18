@@ -1,25 +1,20 @@
-#include "AbstractShape.h"
+#include "Model/AbstractShape.h"
 
-AbstractShape::AbstractShape() : _color(0), _center(sf::Vector2i(0, 0)) {
-	_stage = Stage::First;
-	_nextStage = Stage::Second;
-}
+#include <algorithm>
 
-void AbstractShape::init(sf::Color color, sf::Vector2i center)
+AbstractShape::AbstractShape(DiscreptionShape shape) :
+	_color(shape.color), _center(shape.coordinates[0]), _stage(Stage::First)
+{}
+
+void AbstractShape::Move(Command cmnd)
 {
-	_color = color;
-	_center = center;
-}
-
-void AbstractShape::move(Command cm)
-{
-	switch (cm)
+	switch (cmnd)
 	{
 	case Command::Left:
 		_center.x -= 1;
 		break;
 	case Command::Up:
-		changeStage();
+		_stage = (static_cast<int>(_stage) + 1 > 3) ? Stage(0) : Stage(static_cast<int>(_stage) + 1);
 		break;
 	case Command::Right:
 		_center.x += 1;
@@ -32,46 +27,50 @@ void AbstractShape::move(Command cm)
 	}
 }
 
-std::array<sf::Vector2i, 4> AbstractShape::getCoordinates()
+DiscreptionShape AbstractShape::GetDescription(bool next)
 {
-	std::array<sf::Vector2i, 4> result = getOffset(_stage);;
+	std::array<sf::Vector2i, 4> position;
+	auto stages = Stages();
+	int localStage;
+	int stage = static_cast<int>(_stage);
+	
+	if (!next)
+		localStage = stage;
+	else
+		localStage = static_cast<int>((stage + 1 > 3) ? Stage(0) : Stage(stage + 1));
 
-	for (int i = 0; i < result.size(); i++)
-		result[i] = _center + result[i];
 
-	return result;
+	position[0] = {0,0};
+	position[1] = stages[0][localStage];
+	position[2] = stages[1][localStage];
+	position[3] = stages[2][localStage];
+
+	std::for_each(position.begin(), position.end(), [this](auto& n) { n += _center; });
+	
+	DiscreptionShape result;
+	result.color = _color;
+	result.coordinates = position;
+
+    return result;
 }
 
-void AbstractShape::changeStage()
+sf::Vector2i AbstractShape::GetOffset(Command cmd)
 {
-	switch (_stage)
+	auto cmp = [](const sf::Vector2i& a, const sf::Vector2i& b)
 	{
-	case AbstractShape::Stage::First:
-		_stage = AbstractShape::Stage::Second;
-		_nextStage = AbstractShape::Stage::Third;
-		break;
-	case AbstractShape::Stage::Second:
-		_stage = AbstractShape::Stage::Third;
-		_nextStage = AbstractShape::Stage::Fourth;
-		break;
-	case AbstractShape::Stage::Third:
-		_stage = AbstractShape::Stage::Fourth;
-		_nextStage = AbstractShape::Stage::First;
-		break;
-	case AbstractShape::Stage::Fourth:
-		_stage = AbstractShape::Stage::First;
-		_nextStage = AbstractShape::Stage::Second;
-		break;
-	default:
-		break;
-	}
-}
+		if (a.x < b.x && a.y <= b.y) return true;
+		return false;
+	};
+	int stage = static_cast<int>(_stage);
 
-std::array<sf::Vector2i, 4> AbstractShape::getCoordinatesNextStage() {
-	std::array<sf::Vector2i, 4> result = getOffset(_nextStage);
+	std::array<sf::Vector2i, 3> offset;
+	offset[0] = Stages()[0][stage];
+	offset[1] = Stages()[1][stage];
+	offset[2] = Stages()[2][stage];
+	if (cmd == Command::L_UP)
+		return *std::min_element(offset.begin(), offset.end(), cmp);
+	if (cmd == Command::R_UP)
+		return *std::max_element(offset.begin(), offset.end(), cmp);
 
-	for (int i = 0; i < result.size(); i++)
-		result[i] = _center + result[i];
-
-	return result;
+    return sf::Vector2i(0, 0);
 }

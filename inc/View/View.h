@@ -1,22 +1,36 @@
 #pragma once
 
-#include "AbstratView.h"
-#include "ConfigModel.h"
-
-#include "ViewMap.h"
+#include "data/DiscreptionModel.h"
+#include "interfaces/IView.h"
+#include "View/ViewMap.h"
 
 #include "SFML/Graphics/RenderWindow.hpp"
 
-class View : public AbstratView
+class View : public IView
 {
 public:
-	View(sf::Vector2f sizeWindow, std::string title);
+	/// @brief 
+	/// @param mode  
+	/// @param title 
+	/// @param style 
+	View(sf::VideoMode mode, 
+		 const sf::String& title, 
+		 sf::Uint32 style = sf::Style::Default);
 
-	void update() override;
-	void init(ConfigModel conf);
-	bool isOpen() const;
+	/// @brief 
+	void Update() override;
 
-	sf::RenderWindow& getWindow();
+	/// @brief 
+	/// @param conf 
+	void Init(DiscreptionModel conf);
+
+	/// @brief 
+	/// @return 
+	bool IsOpen() const;
+
+	/// @brief 
+	/// @return 
+	sf::RenderWindow& GetWindow();
 private:
 	sf::Vector2f _sizeWindow;
 

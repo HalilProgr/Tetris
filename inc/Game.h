@@ -1,22 +1,14 @@
 #pragma once
 
-#include "View.h"
-#include "Model.h"
-#include "Controller.h"
+#include "view/View.h"
+#include "model/Model.h"
+#include "controller/Controller.h"
 
-/// Основная концепция:
-/// У Model может быть много View.
-/// У каждого View свой Controller
-/// Для инициализации View используется структура ConfigModel
-
-/// <summary>
-/// Класс реализующий игру тетрис
-/// </summary>
 class Game
 {
 public:
-    Game();
-	void run();
+    explicit Game();
+	void Run();
 private:
     View view;
     Model model;

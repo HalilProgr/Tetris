@@ -1,30 +1,32 @@
-#include "View.h"
+#include "View/View.h"
 
-View::View(sf::Vector2f sizeWindow, std::string title) :
-    _window(sf::VideoMode(sizeWindow.x, sizeWindow.y), title),
-    _vmap(sizeWindow)
+View::View( sf::VideoMode mode, 
+		    const sf::String& title, 
+		    sf::Uint32 style) :
+                _window(mode, title, style),
+                _vmap(Size(mode.width, mode.height))
 {}
 
-void View::update()
+void View::Update()
 {
-    _vmap.update();
+    _vmap.Update();
 
     _window.clear();
     _window.draw(_vmap);
     _window.display();
 }
 
-void View::init(ConfigModel conf)
+void View::Init(DiscreptionModel conf)
 {
-    _vmap.init(conf);
+    _vmap.Init(conf);
 }
 
-bool View::isOpen() const
+bool View::IsOpen() const
 {
     return _window.isOpen();
 }
 
-sf::RenderWindow& View::getWindow()
+sf::RenderWindow& View::GetWindow()
 {
     return _window;
 }
